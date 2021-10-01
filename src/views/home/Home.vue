@@ -4,6 +4,9 @@
       <home-swiper :banners="banners"/>
       <home-recommend-view :recommends="recommends"/>
       <feature-view/>
+      <tab-control class="tab-control" :titles="['流行','新款','精选']"/>
+
+
       <ul>
         <li>1美女</li>
         <li>2美女</li>
@@ -87,26 +90,34 @@
 </template>
 
 <script>
-  import NavBar from 'components/common/navbar/NavBar';
+  //引入子组件
   import HomeSwiper from "./childComps/HomeSwiper";
   import HomeRecommendView from "./childComps/HomeRecommendView";
   import FeatureView from "./childComps/FeatureView";
+
+  // 引入公共组件
+  import NavBar from 'components/common/navbar/NavBar';
+  import TabControl from "components/content/tabControl/TabControl";
+
+  //引入计算属性和方法的组件
   import {getHomeMultidata} from "network/home";
 
 
   export default {
    name:"Home",
    components: {
-     NavBar,
      HomeSwiper,
      HomeRecommendView,
-     FeatureView
+     FeatureView,
+     NavBar,
+     TabControl
    },
     data() {
       return{
         // result:null,
         banners:[],
         recommends:[],
+        titles:[]
 
       }
     },
@@ -136,4 +147,8 @@
   right: 0;
   z-index: 9;
 }
+  .tab-control{
+    position: sticky;
+    top: 44px;
+  }
 </style>
