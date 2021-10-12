@@ -1,9 +1,9 @@
 <template>
     <div class="tab-control">
       <div v-for="(item,index) in titles"
-           :key="index"
-           :class="{ative:index === currentIndex}"
            @click="itemClick(index)"
+           :key="index"
+           :class="{ ative:index === currentIndex}"
            class="tab-control-item">
         <span>{{item}}</span>
       </div>
@@ -28,7 +28,8 @@
         },
         methods:{
           itemClick(index) {
-            this.currentindex = index;
+            this.currentIndex = index;
+            this.$emit('tabClick',index)//子传父的指定组件
           }
         }
     }

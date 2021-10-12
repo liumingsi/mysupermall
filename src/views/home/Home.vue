@@ -1,91 +1,22 @@
 <template>
-    <div id="home">
-      <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
-      <home-swiper :banners="banners"/>
-      <home-recommend-view :recommends="recommends"/>
-      <feature-view/>
-      <tab-control class="tab-control" :titles="['流行','新款','精选']"/>
+    <div id="home" class="wrapper">
+     <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
+     <scroll class="content"
+             ref="scroll"
+             :probe-type="3"
+             @scroll="contentScroll"
+             :pull-up-load="true"
+             @pullingUp="loadMore">
+       <home-swiper :banners="banners"/>
+       <home-recommend-view :recommends="recommends"/>
+       <feature-view/>
+       <tab-control class="tab-control"
+                    :titles="['流行','新款','精选']"
+                    @tabClick="tabClick"/>
+       <goods-list :goods="showGoods"/>
+     </scroll>
 
-
-      <ul>
-        <li>1美女</li>
-        <li>2美女</li>
-        <li>3美女</li>
-        <li>4美女</li>
-        <li>5美女</li>
-        <li>6美女</li>
-        <li>7美女</li>
-        <li>8美女</li>
-        <li>9美女</li>
-        <li>10美女</li>
-        <li>11美女</li>
-        <li>12美女</li>
-        <li>13美女</li>
-        <li>14美女</li>
-        <li>15美女</li>
-        <li>16美女</li>
-        <li>17美女</li>
-        <li>18美女</li>
-        <li>19美女</li>
-        <li>20美女</li>
-        <li>21美女</li>
-        <li>22美女</li>
-        <li>23美女</li>
-        <li>24美女</li>
-        <li>25美女</li>
-        <li>26美女</li>
-        <li>27美女</li>
-        <li>28美女</li>
-        <li>29美女</li>
-        <li>30美女</li>
-        <li>31美女</li>
-        <li>32美女</li>
-        <li>33美女</li>
-        <li>34美女</li>
-        <li>35美女</li>
-        <li>36美女</li>
-        <li>37美女</li>
-        <li>38美女</li>
-        <li>39美女</li>
-        <li>40美女</li>
-        <li>41美女</li>
-        <li>42美女</li>
-        <li>43美女</li>
-        <li>44美女</li>
-        <li>45美女</li>
-        <li>46美女</li>
-        <li>47美女</li>
-        <li>48美女</li>
-        <li>49美女</li>
-        <li>50美女</li>
-        <li>51美女</li>
-        <li>52美女</li>
-        <li>53美女</li>
-        <li>54美女</li>
-        <li>55美女</li>
-        <li>56美女</li>
-        <li>57美女</li>
-        <li>58美女</li>
-        <li>59美女</li>
-        <li>60美女</li>
-        <li>61美女</li>
-        <li>62美女</li>
-        <li>63美女</li>
-        <li>64美女</li>
-        <li>65美女</li>
-        <li>66美女</li>
-        <li>67美女</li>
-        <li>68美女</li>
-        <li>69美女</li>
-        <li>70美女</li>
-        <li>71美女</li>
-        <li>72美女</li>
-        <li>73美女</li>
-        <li>74美女</li>
-        <li>75美女</li>
-        <li>76美女</li>
-        <li>77美女</li>
-      </ul>
+      <back-top @click.native="backClick" v-show="isShowBackTop"/>
     </div>
 </template>
 
@@ -98,10 +29,12 @@
   // 引入公共组件
   import NavBar from 'components/common/navbar/NavBar';
   import TabControl from "components/content/tabControl/TabControl";
+  import GoodsList from "components/content/goods/GoodsList";
+  import Scroll from "components/common/scroll/Scroll";
+  import BackTop from "components/content/backTop/BackTop";
 
   //引入计算属性和方法的组件
-  import {getHomeMultidata} from "network/home";
-
+  import {getHomeMultidata,getHomeGoods} from "network/home";
 
   export default {
    name:"Home",
@@ -110,25 +43,81 @@
      HomeRecommendView,
      FeatureView,
      NavBar,
-     TabControl
+     TabControl,
+     GoodsList,
+     Scroll,
+     BackTop,
    },
     data() {
       return{
         // result:null,
         banners:[],
         recommends:[],
-        titles:[]
-
+        goods:{
+          'pop':{page:0,list:[]},
+          'new':{page:0,list:[]},
+          'sell':{page:0,list:[]},
+        },
+        currentType:'pop',
+        isShowBackTop:false,
       }
+    },
+    computed:{
+     showGoods() {
+       return this.goods[this.currentType].list
+     }
     },
     created() {
      //1,请求多个数据
-      getHomeMultidata().then(res => {
-        // console.log(res);
-        // this.result = res
-        this.banners = res.data.data.banner.list;
-        this.recommends = res.data.data.recommend.list;
-      })
+      this.getHomeMultidata();
+      //2,请求商品数据
+      this.getHomeGoods('pop')
+      this.getHomeGoods('new')
+      this.getHomeGoods('sell')
+    },
+    methods:{
+       //事件监听相关的方法
+      tabClick(index) {
+        switch (index) {
+          case 0:
+            this.currentType = 'pop'
+                break
+          case 1:
+            this.currentType = 'new'
+                break
+          case 2:
+            this.currentType = 'sell'
+                break
+
+        }
+
+      },
+      backClick(){
+        this.$refs.scroll.scrollTo(0,0)
+      },
+      contentScroll(position) {
+        this.isShowBackTop = (-position.y) > 1000
+      },
+      loadMore() {
+        this.getHomeGoods(this.currentType)
+      },
+      // 网络请求相关的方法
+       getHomeMultidata() {
+         getHomeMultidata().then(res => {
+           // console.log(res);
+           // this.result = res
+           this.banners = res.data.data.banner.list;
+           this.recommends = res.data.data.recommend.list;
+         });
+       },
+       getHomeGoods(type) {
+         const page = this.goods[type].page + 1
+         getHomeGoods(type,page).then(res => {
+           // console.log(res.data.data.list);
+           this.goods[type].list.push(...res.data.data.list)
+           this.goods[type].page += 1
+           this.$refs.scroll.finishPullUp()
+      })}
     }
 
   }
@@ -136,7 +125,9 @@
 
 <style scoped>
   #home{
-    padding-top: 44px;
+    /*padding-top: 44px;*/
+    height: 100vh;
+    position: relative;
   }
 .home-nav {
   background-color: var(--color-tint);
@@ -148,7 +139,22 @@
   z-index: 9;
 }
   .tab-control{
-    position: sticky;
+    /*position: sticky;*/
     top: 44px;
+    z-index: 9;
   }
+.content{
+    overflow:hidden;
+    position: absolute;
+    top: 44px;
+    bottom: 49px;
+    left: 0;
+    right: 0;
+  }
+
+  /*.content{*/
+  /*  height: calc(100% - 93px);*/
+  /*  overflow: hidden;*/
+  /*  margin-top: 44px;*/
+  /*}*/
 </style>
