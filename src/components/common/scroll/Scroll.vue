@@ -29,10 +29,15 @@
     mounted() {
       // 1.创建BScroll对象
       this.scroll = new BScroll(this.$refs.aba,{
-        click: true,
         probeType: this.probeType,
+        click: true, // 鼠标点击滚动
+        disableMouse: false,// 启用鼠标拖动
+        disableTouch: false,// 启用手指触摸
         pullUpLoad: this.pullUpLoad,
-        ObserveDom:true
+        // click: true,
+        // probeType: this.probeType,
+        // pullUpLoad: this.pullUpLoad,
+        // ObserveDom:true
       })
 
       // 2.监听滚动的位置
@@ -46,7 +51,7 @@
       })
     },
     methods:{
-        scrollTo(x,y,time=300){
+      scrollTo(x,y,time=300){
           this.scroll && this.scroll.scrollTo(x,y,time)
         },
       finishPullUp() {
@@ -63,7 +68,5 @@
 </script>
 
 <style scoped>
-.waw{
-  height: 400px;
-}
+
 </style>
