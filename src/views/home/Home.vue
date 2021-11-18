@@ -120,10 +120,10 @@
       },
       contentScroll(position) {
         //判断BackTop是否显示
-
-
         //决定tabControl是否吸顶（position:fixed)
         this.listenShoBackTop(position)
+        this.isTabFixed = (-position.y) > this.tabOffsetTop
+
       },
       loadMore() {
         this.getHomeGoods(this.currentType)
